@@ -1,0 +1,39 @@
+name: Automated Tests
+on:
+  pull_request:
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        shard: [1, 2]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.13.1'
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Run tests (${{ matrix.shard }}/${{ strategy.job-total }})
+        run: yarn test --shard=${{ matrix.shard }}/${{ strategy.job-total }} --coverage
+      - name: Rename coverage file
+        run: mv coverage/coverage-final.json coverage/${{matrix.shard}}.json
+      - uses: actions/upload-artifact@v3
+        with:
+          name: coverage-artifacts
+          path: coverage/
+
+report-coverage:
+    runs-on: ubuntu-latest
+    needs: [run-tests]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: coverage-artifacts
+          path: coverage
+      - name: Merge code coverage
+        run: npx nyc merge coverage/ coverage/coverage-final.json
+      - name: Generate coverage final report
+        run: npx nyc report --reporter html --reporter text -t coverage --report-dir coverage/summary

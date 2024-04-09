@@ -36,4 +36,4 @@ jobs:
         - name: Merge code coverage
           run: npx nyc merge coverage/ coverage/coverage-final.json
         - name: Generate coverage final report
-          run: npx nyc report --reporter html --reporter text -t coverage --report-dir coverage/summary
+          run: npx nyc report --reporter lcov --reporter text -t coverage --report-dir coverage

@@ -5,7 +5,9 @@ on:
 jobs:
   run-tests:
     runs-on: ubuntu-latest
+    continue-on-error: false
     strategy:
+      fail-fast: true
       matrix:
         shard: [1, 2]
     steps:
